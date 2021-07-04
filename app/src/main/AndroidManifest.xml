@@ -12,7 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.300CEM">
-        <activity android:name=".Login"></activity>
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode" />
+        <activity android:name=".Login"/>
         <activity android:name=".Main" />
         <activity android:name=".LoadApp">
             <intent-filter>
