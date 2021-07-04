@@ -68,25 +68,25 @@ public class Main extends AppCompatActivity {
     private void bindImageAnalysis(@NonNull ProcessCameraProvider cameraProvider) {
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
                         .setTargetResolution(new Size(720, 720))
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST) //keep only the latest frame
                         .build();
-
+        // setup to read qr codes
         BarcodeScannerOptions options = new BarcodeScannerOptions.Builder()
                 .setBarcodeFormats( Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC )
                 .build();
         BarcodeScanner scanner = BarcodeScanning.getClient(options);
-
+        // analyse each frame
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), new ImageAnalysis.Analyzer() {
             @Override
             public void analyze(@NonNull @NotNull ImageProxy imageProxy) {
                 @SuppressLint("UnsafeOptInUsageError") Image mediaImage = imageProxy.getImage(); // experimental -> suppress error
                 if (mediaImage != null) {
                     InputImage image = InputImage.fromMediaImage(mediaImage, imageProxy.getImageInfo().getRotationDegrees());
-                    processImage(image, scanner, mediaImage, imageProxy);
+                    findQRCodes(image, scanner, mediaImage, imageProxy);
                 }
             }
         });
-
+        // setup image preview
         Preview preview = new Preview.Builder().build();
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK) // select rear camera
@@ -96,14 +96,15 @@ public class Main extends AppCompatActivity {
         cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, imageAnalysis, preview);
     }
 
-    private void processImage(InputImage image, BarcodeScanner scanner, Image mediaImage, ImageProxy imageProxy ){
+    private void findQRCodes(InputImage image, BarcodeScanner scanner, Image mediaImage, ImageProxy imageProxy ){
         Task<List<Barcode>> result = scanner.process(image)
                 .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
                     @Override
                     public void onSuccess(List<Barcode> barcodes) {
                         // Task completed successfully
-                        // ...
-                        Log.d("10", ""+barcodes.size());
+                        if(barcodes.size() > 0) { // if qr codes are present in image
+                            processQRCode(barcodes.get(0)); // process first qr code in list
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -119,6 +120,13 @@ public class Main extends AppCompatActivity {
                         imageProxy.close();
                     }
                 });
+    }
+
+    private void processQRCode(Barcode qr){
+            String siteId = qr.getRawValue();
+            //Log.d("10", qrtext);
+
+
     }
 
 
