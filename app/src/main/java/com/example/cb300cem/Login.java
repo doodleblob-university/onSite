@@ -8,6 +8,7 @@ public class Login extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
     }

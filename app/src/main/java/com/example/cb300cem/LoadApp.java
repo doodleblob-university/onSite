@@ -15,11 +15,12 @@ public class LoadApp extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.load);
 
-        
 
-
-        Intent intent = new Intent(this, Main.class);
+        Intent intent = new Intent(this, Login.class);
         startActivity(intent);
+
+        //Intent intent = new Intent(this, Main.class);
+        //startActivity(intent);
 
 
 
