@@ -11,7 +11,7 @@ public class LoadApp extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getActionBar().hide();
+        this.getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.load);
 
