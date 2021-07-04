@@ -1,5 +1,6 @@
 package com.example.cb300cem;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -14,8 +15,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.internal.GoogleSignInOptionsExtensionParcelable;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 public class Login extends AppCompatActivity {
 
@@ -58,8 +66,10 @@ public class Login extends AppCompatActivity {
         if(requestCode == signInRequestCode){
             Task<GoogleSignInAccount> accountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
-                // success -> firebase auth
+                // successful google login
+                GoogleSignInAccount account = accountTask.getResult(ApiException.class);
 
+                fbGoogleAuth(account); // firebase auth
 
             } catch (Exception e) {
                 // google log in failed
@@ -67,5 +77,37 @@ public class Login extends AppCompatActivity {
 
             }
         }
+    }
+
+    private void fbGoogleAuth(GoogleSignInAccount account){
+        AuthCredential cred = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        auth.signInWithCredential(cred)
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        // Logged in
+                        FirebaseUser user = auth.getCurrentUser();
+                        String userId = user.getUid();
+                        String email = user.getEmail();
+
+                        if(authResult.getAdditionalUserInfo().isNewUser()){
+                            // account created for new user
+                            Toast.makeText(Login.this,"Account created", Toast.LENGTH_SHORT).show();
+                        }else{
+                            // account already exists -> logged in
+                            Toast.makeText(Login.this,"Logged In", Toast.LENGTH_SHORT).show();
+                        }
+                        Toast.makeText(Login.this, user.getDisplayName(), Toast.LENGTH_SHORT).show();
+
+                        // login finished
+                        finish();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // login failed
+                    }
+                });
     }
 }
