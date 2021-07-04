@@ -40,15 +40,16 @@ public class Main extends AppCompatActivity {
 
     private PreviewView previewView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    private User user;
+
+    public User user;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         this.getSupportActionBar().hide();
+        user = new User(this); // setup user details
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
-        user = new User(this);
 
         previewView = findViewById(R.id.camerapreview);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -64,7 +65,6 @@ public class Main extends AppCompatActivity {
                 }
             }
         }, ContextCompat.getMainExecutor(this));
-
 
     }
 
