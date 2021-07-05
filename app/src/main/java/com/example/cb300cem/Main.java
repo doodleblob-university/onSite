@@ -49,7 +49,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class Main extends AppCompatActivity {
+public class Main extends AppCompatActivity implements User.UICallback {
 
     private PreviewView previewView;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -67,6 +67,8 @@ public class Main extends AppCompatActivity {
         this.getSupportActionBar().hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        checkIn = findViewById(R.id.userActive);
 
         user = new User(this); // setup user details
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -151,12 +153,19 @@ public class Main extends AppCompatActivity {
         long currTime = System.currentTimeMillis() / 1000L;
         if(scanTime == 0 || currTime > scanTime + 3 ) { // stops multiple scans at once
             user.checkInOut(siteId);
+            user.setCallback(this);
             scanTime = currTime;
             v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK));
         }
 
 
 
+    }
+
+    @Override
+    public void changeText(String text, int color) {
+        checkIn.setText(text);
+        checkIn.setTextColor(color);
     }
 
     /*

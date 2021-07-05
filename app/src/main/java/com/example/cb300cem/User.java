@@ -64,6 +64,14 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
 
     }
 
+    User.UICallback uiCallback;
+    public interface UICallback {
+        void changeText(String text, int color);
+    }
+    public void setCallback(User.UICallback uiCallback){
+        this.uiCallback = uiCallback;
+    }
+
     public void checkInOut(String sId){
         coords.getLocation(fusedLocationProviderClient, sId);
         coords.setCallback(this);
@@ -80,12 +88,16 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
 
     @Override
     public void siteHandler(String site, String sId, String sitelat, String sitelon) {
+        String uiText = "Not on site";
+        int uiColor = Color.BLACK;
         if(siteId != null && siteId.equals(sId)){
             Toast.makeText(context, "Checking out at "+site, Toast.LENGTH_SHORT).show();
             // checkout
             checkOut();
 
             // clear values
+            uiText = "Not on site";
+            uiColor = Color.BLACK;
             this.currentsite = null;
             this.siteId = null;
             this.sitelat = null;
@@ -99,6 +111,8 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
             if (checkUserSiteLocation()){// if user is near site
                 checkIn(sId);
                 //Log.d("1000", activeSite);
+                uiText = site;
+                uiColor = Color.GREEN;
                 // change values
                 this.currentsite = site;
                 this.siteId = sId;
@@ -107,7 +121,7 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
             }
         }
         // change ui
-
+        uiCallback.changeText(uiText, uiColor);
 
     }
 
