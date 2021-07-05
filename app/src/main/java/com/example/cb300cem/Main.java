@@ -13,11 +13,20 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.util.Size;
 import android.view.OrientationEventListener;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -43,13 +52,20 @@ public class Main extends AppCompatActivity {
 
     public User user;
 
+    private long scanTime = 0;
+
+    private TextView checkIn;
+    private Vibrator v;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         this.getSupportActionBar().hide();
         user = new User(this); // setup user details
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         previewView = findViewById(R.id.camerapreview);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
@@ -126,8 +142,17 @@ public class Main extends AppCompatActivity {
     }
 
     private void processQRCode(Barcode qr){
-            String siteId = qr.getRawValue();
-            //Log.d("10", qrtext);
+        String siteId = qr.getRawValue();
+        long currTime = System.currentTimeMillis() / 1000L;
+        try {
+            if(scanTime == 0 || currTime > scanTime + 10 ) { // stops multiple scans at once
+                user.checkInOut(siteId);
+                scanTime = currTime;
+                v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK));
+            }
+        }catch (Exception e){
+            v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        }
 
 
     }

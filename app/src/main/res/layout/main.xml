@@ -27,8 +27,9 @@
                 android:layout_height="300dp"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:id="@+id/image"
-                android:background="@drawable/qr_boundary"/>
+                android:id="@+id/qr_boundary"
+                android:background="@drawable/qr_boundary"
+                android:contentDescription="qr boundary" />
 
         </RelativeLayout>
     </FrameLayout>
@@ -36,9 +37,27 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="100px"
+        android:layout_height="100dp"
         android:visibility="visible"
-        android:layout_weight="1"
-    />
+        android:layout_weight="1">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/userActive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="42dp"
+                android:layout_marginTop="38dp"
+                android:layout_marginEnd="38dp"
+                android:text="Not on site"
+                android:textAlignment="center"
+                android:textSize="24sp" />
+        </RelativeLayout>
+    </FrameLayout>
 
 </androidx.appcompat.widget.LinearLayoutCompat>
