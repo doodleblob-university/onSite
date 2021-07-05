@@ -60,14 +60,14 @@ public class Sites {
         });
     }
 
-    public void checkIn(FirebaseFirestore db, Map<String, Object> timesheet){
+    public void checkIn(FirebaseFirestore db, Map<String, Object> timesheet, String uId){
         db.collection("timesheet")
                 .add(timesheet)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
                         String activeSite = documentReference.getId();
-                        //TODO: update user db
+                        setActive(db, uId, activeSite);
                         sitesCallback.checkInHandler(activeSite);
                     }
                 })
@@ -80,9 +80,44 @@ public class Sites {
 
     }
 
-    public void checkOut(FirebaseFirestore db, String doc, String time){
+    private void setActive(FirebaseFirestore db, String uId, String usId){
+        db.collection("users").document(uId)
+                .update("active", usId)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        //Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        //Log.w(TAG, "Error updating document", e);
+                    }
+                });
+    }
+
+    public void checkOut(FirebaseFirestore db, String doc, String time, String uId){
         db.collection("timesheet").document(doc)
                 .update("out", time)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        clearActive(db, uId);
+                        //Log.d(TAG, "DocumentSnapshot successfully updated!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        //Log.w(TAG, "Error updating document", e);
+                    }
+                });
+    }
+
+    private void clearActive(FirebaseFirestore db, String uId){
+        db.collection("users").document(uId)
+                .update("active", null)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

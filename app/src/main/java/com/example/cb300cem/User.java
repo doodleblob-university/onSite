@@ -148,7 +148,7 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
         timesheet.put("in", getCurrentUnixStr());
         timesheet.put("out", null);
 
-        sites.checkIn(db, timesheet);
+        sites.checkIn(db, timesheet, usr.getUid());
         sites.setCallback(this);
     }
 
@@ -159,7 +159,7 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
 
     private void checkOut(){
         //Log.d("1000", activeSite);
-        sites.checkOut(db, activeSite, getCurrentUnixStr());
+        sites.checkOut(db, activeSite, getCurrentUnixStr(), usr.getUid());
     }
 
     private String getCurrentUnixStr(){
