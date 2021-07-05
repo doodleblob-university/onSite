@@ -57,16 +57,17 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
     }
 
     public void checkInOut(String sId){
-        coords.getLocation(fusedLocationProviderClient);
+        coords.getLocation(fusedLocationProviderClient, sId);
         coords.setCallback(this);
-        sites.getSiteInformation(db, sId);
-        sites.setCallback(this);
     }
 
     @Override
-    public void coordHandler(String lat, String lon) {
+    public void coordHandler(String lat, String lon, String sId) {
+        //0.01° = 1.11 km
         this.lat = lat;
         this.lon = lon;
+        sites.getSiteInformation(db, sId);
+        sites.setCallback(this);
     }
 
     @Override
@@ -83,19 +84,36 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
         } else {
             Toast.makeText(context, "Checking in at "+site, Toast.LENGTH_SHORT).show();
             // checkin
+            // set values
+            this.sitelat = sitelat;
+            this.sitelon = sitelon;
+            if (checkUserSiteLocation()){// if user is near site
 
-            // change values
 
+                // change values
+                this.currentsite = site;
+                this.siteId = sId;
+            }else{
+                Toast.makeText(context, "You are too far away from the site to check in", Toast.LENGTH_SHORT).show();
+            }
         }
-
-        this.currentsite = site;
-        this.siteId = sId;
-        this.sitelat = sitelat;
-        this.sitelon = sitelon;
-        // change textview
+        // change ui
 
 
+    }
 
+    private Boolean checkUserSiteLocation(){
+        Double uLat = Double.parseDouble(this.lat);
+        Double uLon = Double.parseDouble(this.lon);
+        Double sLat = Double.parseDouble(this.sitelat);
+        Double sLon = Double.parseDouble(this.sitelon);
+        if( (uLat - 0.01) < sLat && sLat < (uLat + 0.01) ){
+            if( (uLon - 0.01) < sLon && sLon < (uLon + 0.01) ){
+                // user is within approx 1km to the site
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkIn(){
