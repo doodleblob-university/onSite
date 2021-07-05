@@ -75,12 +75,16 @@ public class Main extends AppCompatActivity implements User.UICallback {
         previewView = findViewById(R.id.camerapreview);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
+        user.loadData();
+        user.setCallback(this); // set callback up for ui change
+
         cameraProviderFuture.addListener(new Runnable() { //
             @Override
             public void run() {
                 try {
                     ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                     bindImageAnalysis(cameraProvider);
+
                 } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }

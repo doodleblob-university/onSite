@@ -3,6 +3,7 @@ package com.example.cb300cem;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static android.content.ContentValues.TAG;
 
@@ -52,17 +54,20 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
     private String sitelon;
     private String activeSite;
 
-    public User(Context c) {
-        sites = new Sites();
-        coords = new Coords();
+    public static final String SHARED_PREFS = "sharedPrefs";
 
+    public User(Context c) {
         context = c;
         usr = FirebaseAuth.getInstance().getCurrentUser();
         name = usr.getDisplayName();
         db = FirebaseFirestore.getInstance();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
 
+        sites = new Sites();
+        coords = new Coords();
+
     }
+
     //region callback for updating interface when checking in
     User.UICallback uiCallback;
     public interface UICallback {
@@ -91,10 +96,6 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
     @Override
     public void siteHandler(String site, String sId, String sitelat, String sitelon) {
         //
-        //default ui values
-        String uiText = "Not on site";
-        int uiColor = Color.BLACK;
-
         if(siteId != null && siteId.equals(sId)){ // if the previous siteId equals the recently scanned one
             // CHECKING OUT OF SITE
             Toast.makeText(context, "Checking out at "+site, Toast.LENGTH_SHORT).show();
@@ -102,8 +103,6 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
             checkOut(); //
 
             // reset values
-            uiText = "Not on site";
-            uiColor = Color.BLACK;
             this.currentsite = null;
             this.siteId = null;
             this.sitelat = null;
@@ -119,15 +118,37 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
                 // change values
                 this.currentsite = site;
                 this.siteId = sId;
-                uiText = site;
-                uiColor = Color.GREEN;
             }else{
                 Toast.makeText(context, "You are too far away from the site to check in", Toast.LENGTH_SHORT).show();
             }
         }
-        // change ui
-        uiCallback.changeText(uiText, uiColor); // callback to Main, where the ui can be changed to express status
+    }
 
+    private void setupUI(){
+        String uiText = "Not on site";
+        int uiColor = Color.BLACK;
+        if(activeSite != null){
+            uiText = currentsite;
+            uiColor = Color.GREEN;
+        }
+        //uiCallback.changeText(uiText, uiColor); // callback to Main, where the ui can be changed to express status
+
+    }
+
+
+    private void saveData(){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("activeSite", this.activeSite);
+        editor.putString("currentSite", this.currentsite);
+    }
+
+    public void loadData(){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(SHARED_PREFS, Context.MODE_PRIVATE);
+        this.activeSite = sharedPreferences.getString("activeSite", null);
+        this.currentsite = sharedPreferences.getString("currentSite", null);
+        setupUI();
     }
 
     private Boolean checkUserSiteLocation(){
@@ -167,11 +188,16 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
     public void checkInHandler(String activeSite) {
         // callback from checkIn, with the returned active site document id (from the 'timetables' collection in db)
         this.activeSite = activeSite;
+        setupUI();
+        saveData();
     }
 
     private void checkOut(){
         // call checkOut function in the 'Sites' class with the necessary args
         sites.checkOut(db, activeSite, getCurrentUnixStr(), usr.getUid());
+        activeSite = null;
+        setupUI();
+        saveData();
     }
 
     private String getCurrentUnixStr(){
