@@ -21,15 +21,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.300CEM"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Options"></activity>
 
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode" />
 
-        <activity android:name=".Login" />
-        <activity android:name=".Main" />
-        <activity android:name=".LoadApp">
+        <activity android:name=".Login"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Main"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".LoadApp"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
