@@ -21,9 +21,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.content.ContentValues.TAG;
 
-public class User {
+public class User implements Sites.SitesCallback, Coords.LocationCallback {
+    Sites sites;
+    Coords coords;
 
     private Context context;
     private FirebaseFirestore db;
@@ -40,135 +45,66 @@ public class User {
     private String sitelon;
 
     public User(Context c) {
+        sites = new Sites();
+        coords = new Coords();
+
         context = c;
         usr = FirebaseAuth.getInstance().getCurrentUser();
+        name = usr.getDisplayName();
         db = FirebaseFirestore.getInstance();
-        setName();
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
 
     }
 
-    private void setName() {
-        //gets name from datastore -> if not present, stores name provided from google
-        final String[] tempname = {usr.getDisplayName()};
-        db.collection("users").document(usr.getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<DocumentSnapshot> task) {
-                try {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            tempname[0] = document.getData().get("name").toString();
-
-                        } else {
-                            // user does not exist
-                            // should not occur during normal operation
-                            Log.d(TAG, "User does not exist.  Consult system admin");
-                        }
-                    } else {
-                        throw task.getException();
-                    }
-                } catch (NullPointerException e) {
-                    Log.d(TAG, "User's name not present in datastore");
-                    changeName(tempname[0]);
-                    // name field does not exist in database
-                } catch (Exception e) {
-                    // unexpected exception
-                    Log.d(TAG, "Unexpected Exception: " + e);
-
-                }
-            }
-        }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<DocumentSnapshot> task) {
-                name = tempname[0];
-                Toast.makeText(context, "Hello " + name + "!", Toast.LENGTH_SHORT).show();
-            }
-        });
+    public void checkInOut(String sId){
+        coords.getLocation(fusedLocationProviderClient);
+        coords.setCallback(this);
+        sites.getSiteInformation(db, sId);
+        sites.setCallback(this);
     }
 
-    public void changeName(String n) {
-        // updates name in database
-        db.collection("users").document(usr.getUid())
-                .update("name", n)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "User's name successfully updated!");
-                        name = n; //update name locally too!
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating user's name", e);
-                    }
-                });
+    @Override
+    public void coordHandler(String lat, String lon) {
+        this.lat = lat;
+        this.lon = lon;
     }
 
-    public void checkInOut(String site) {
-        getSiteInformation(site);
-        Log.d("10", currentsite); //throws error if current site not valid
-        getLocation(); // 0.01° = 1.11 km accuracy -> 0.05+-
+    @Override
+    public void siteHandler(String site, String sId, String sitelat, String sitelon) {
+        if(siteId != null && siteId.equals(sId)){
+            Toast.makeText(context, "Checking out at "+site, Toast.LENGTH_SHORT).show();
+            // checkout
+
+            // clear values
+            this.currentsite = null;
+            this.siteId = null;
+            this.sitelat = null;
+            this.sitelon = null;
+        } else {
+            Toast.makeText(context, "Checking in at "+site, Toast.LENGTH_SHORT).show();
+            // checkin
+
+            // change values
+
+        }
+
+        this.currentsite = site;
+        this.siteId = sId;
+        this.sitelat = sitelat;
+        this.sitelon = sitelon;
+        // change textview
 
 
 
     }
 
-    private void getSiteInformation(String site) {
-        db.collection("sites").document(site).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        currentsite = document.getData().get("name").toString();
-                        sitelat = document.getData().get("latitude").toString();
-                        sitelon = document.getData().get("longitude").toString();
-
-                    } else {
-                        // does not exist
-                        Log.d(TAG, "Site does not exist. Invalid QR code");
-                        currentsite = null;
-                    }
-                } else {
-                    //task.getException();
-                    currentsite = null;
-                }
-
-            }
-        }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<DocumentSnapshot> task) {
-                return;
-            }
-        });
-    }
-
-    @SuppressLint("MissingPermission") //TODO: Permissions
-    private void getLocation() {
-
-        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<Location> task) {
-                Location location = task.getResult();
-                if( location != null ){
-                    lat = String.valueOf(location.getLatitude());
-                    lon = String.valueOf(location.getLongitude());
-
-                }
-            }
-        }).addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull @NotNull Task<Location> task) {
-                return;
-            }
-        });
-    }
-    /*
-    public void signOut(){
+    private void checkIn(){
 
     }
-    */
+
+    private void checkOut(){
+
+    }
 
 }
+

@@ -143,16 +143,14 @@ public class Main extends AppCompatActivity {
 
     private void processQRCode(Barcode qr){
         String siteId = qr.getRawValue();
+
         long currTime = System.currentTimeMillis() / 1000L;
-        try {
-            if(scanTime == 0 || currTime > scanTime + 10 ) { // stops multiple scans at once
-                user.checkInOut(siteId);
-                scanTime = currTime;
-                v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK));
-            }
-        }catch (Exception e){
-            v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_HEAVY_CLICK));
+        if(scanTime == 0 || currTime > scanTime + 3 ) { // stops multiple scans at once
+            user.checkInOut(siteId);
+            scanTime = currTime;
+            v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK));
         }
+
 
 
     }
