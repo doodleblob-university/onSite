@@ -69,14 +69,13 @@ public class Main extends AppCompatActivity implements User.UICallback {
         setContentView(R.layout.main);
 
         checkIn = findViewById(R.id.userActive);
-
         user = new User(this); // setup user details
-        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE); // init haptic motor
 
         previewView = findViewById(R.id.camerapreview);
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
 
-        cameraProviderFuture.addListener(new Runnable() {
+        cameraProviderFuture.addListener(new Runnable() { //
             @Override
             public void run() {
                 try {
@@ -141,6 +140,7 @@ public class Main extends AppCompatActivity implements User.UICallback {
                 }).addOnCompleteListener(new OnCompleteListener<List<Barcode>>() {
                     @Override
                     public void onComplete(@NonNull @NotNull Task<List<Barcode>> task) {
+                        // close both mediaImage and imageProxy upon completion of processing a single frame for qr codes
                         mediaImage.close();
                         imageProxy.close();
                     }
@@ -148,36 +148,24 @@ public class Main extends AppCompatActivity implements User.UICallback {
     }
 
     private void processQRCode(Barcode qr){
-        String siteId = qr.getRawValue();
+        String siteId = qr.getRawValue(); // get string from qr code -> should be the site id with a valid qr code
 
-        long currTime = System.currentTimeMillis() / 1000L;
-        if(scanTime == 0 || currTime > scanTime + 3 ) { // stops multiple scans at once
+        long currTime = System.currentTimeMillis() / 1000L; // get current unix time in seconds
+        if(scanTime == 0 || currTime > scanTime + 3 ) { // stops multiple scans at once - 3 second freeze
             user.checkInOut(siteId);
-            user.setCallback(this);
+            user.setCallback(this); // set callback up for ui change
             scanTime = currTime;
-            v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK));
+            v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK)); // vibrate on qr recognised
         }
-
 
 
     }
 
     @Override
     public void changeText(String text, int color) {
+        // changes text to alert user what site they are checked into
         checkIn.setText(text);
         checkIn.setTextColor(color);
     }
-
-    /*
-    public void changeText(String text, ColorInt color){
-        TextView activeText = findViewById(R.id.userActive);
-        activeText.setText(text);
-        activeText.setTextColor((ColorStateList) color);
-    }
-
-     */
-
-
-
 
 }
