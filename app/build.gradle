@@ -44,6 +44,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
     implementation platform('com.google.firebase:firebase-bom:28.2.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-firestore:23.0.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
@@ -59,4 +60,7 @@ dependencies {
 
     implementation 'com.google.mlkit:barcode-scanning:16.2.0'
     implementation 'com.google.android.gms:play-services-mlkit-barcode-scanning:16.2.0'
+
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
+
 }

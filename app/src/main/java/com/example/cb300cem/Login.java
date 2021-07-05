@@ -97,7 +97,7 @@ public class Login extends AppCompatActivity {
                             // account already exists -> logged in
                             Toast.makeText(Login.this,"Logged In", Toast.LENGTH_SHORT).show();
                         }
-                        Toast.makeText(Login.this, user.getDisplayName(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(Login.this, user.getDisplayName(), Toast.LENGTH_SHORT).show();
 
                         // login finished
                         startActivity(new Intent(Login.this, Main.class));

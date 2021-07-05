@@ -27,6 +27,7 @@ public class LoadApp extends AppCompatActivity {
         }else{
             startActivity(new Intent(this, Main.class));
         }
+
         finish(); // close loading activity
     }
 
