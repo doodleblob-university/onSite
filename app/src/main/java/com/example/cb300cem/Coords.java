@@ -17,7 +17,7 @@ public class Coords {
 
     public Coords(){
     }
-
+    //
     Coords.LocationCallback locationCallback;
     public interface LocationCallback {
         void coordHandler(String lat, String lon, String sId);
@@ -30,11 +30,11 @@ public class Coords {
     public void getLocation(FusedLocationProviderClient fusedLocationProviderClient, String sId) {
         fusedLocationProviderClient.getCurrentLocation(
                 LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
+                    // create generic cancellation token using intellisense
                     @Override
                     public boolean isCancellationRequested() {
                         return false;
                     }
-
                     @NonNull
                     @NotNull
                     @Override
