@@ -1,5 +1,6 @@
 package com.example.cb300cem;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +14,11 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -61,10 +65,10 @@ public class Main extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         this.getSupportActionBar().hide();
-        user = new User(this); // setup user details
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        user = new User(this); // setup user details
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         previewView = findViewById(R.id.camerapreview);
@@ -154,6 +158,15 @@ public class Main extends AppCompatActivity {
 
 
     }
+
+    /*
+    public void changeText(String text, ColorInt color){
+        TextView activeText = findViewById(R.id.userActive);
+        activeText.setText(text);
+        activeText.setTextColor((ColorStateList) color);
+    }
+
+     */
 
 
 

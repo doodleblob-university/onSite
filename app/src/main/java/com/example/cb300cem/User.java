@@ -1,9 +1,12 @@
 package com.example.cb300cem;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.location.Location;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,13 +19,17 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.content.ContentValues.TAG;
 
@@ -43,6 +50,7 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
     private String siteId;
     private String sitelat;
     private String sitelon;
+    private String activeSite;
 
     public User(Context c) {
         sites = new Sites();
@@ -75,6 +83,7 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
         if(siteId != null && siteId.equals(sId)){
             Toast.makeText(context, "Checking out at "+site, Toast.LENGTH_SHORT).show();
             // checkout
+            checkOut();
 
             // clear values
             this.currentsite = null;
@@ -88,8 +97,8 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
             this.sitelat = sitelat;
             this.sitelon = sitelon;
             if (checkUserSiteLocation()){// if user is near site
-
-
+                checkIn(sId);
+                //Log.d("1000", activeSite);
                 // change values
                 this.currentsite = site;
                 this.siteId = sId;
@@ -116,13 +125,34 @@ public class User implements Sites.SitesCallback, Coords.LocationCallback {
         return false;
     }
 
-    private void checkIn(){
+    private void checkIn(String siteId){
+        DocumentReference userRef = db.document("users/"+this.usr.getUid());
+        DocumentReference siteRef = db.document("sites/"+siteId);
+        Map<String, Object> timesheet = new HashMap<>();
+        timesheet.put("site", siteRef);
+        timesheet.put("user", userRef);
+        timesheet.put("in", getCurrentUnixStr());
+        timesheet.put("out", null);
 
+        sites.checkIn(db, timesheet);
+        sites.setCallback(this);
+    }
+
+    @Override
+    public void checkInHandler(String activeSite) {
+        this.activeSite = activeSite;
     }
 
     private void checkOut(){
-
+        //Log.d("1000", activeSite);
+        sites.checkOut(db, activeSite, getCurrentUnixStr());
     }
+
+    private String getCurrentUnixStr(){
+        long currTime = System.currentTimeMillis() / 1000L;
+        return Long.toString(currTime);
+    }
+
 
 }
 

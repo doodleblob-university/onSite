@@ -5,7 +5,10 @@ import android.annotation.SuppressLint;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
 
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +28,21 @@ public class Coords {
 
     @SuppressLint("MissingPermission")
     public void getLocation(FusedLocationProviderClient fusedLocationProviderClient, String sId) {
-        fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
+        fusedLocationProviderClient.getCurrentLocation(
+                LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY, new CancellationToken() {
+                    @Override
+                    public boolean isCancellationRequested() {
+                        return false;
+                    }
+
+                    @NonNull
+                    @NotNull
+                    @Override
+                    public CancellationToken onCanceledRequested(@NonNull @NotNull OnTokenCanceledListener onTokenCanceledListener) {
+                        return null;
+                    }
+                }
+        ).addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
             @Override
             public void onComplete(@NonNull @NotNull Task<android.location.Location> task) {
                 android.location.Location location = task.getResult();
